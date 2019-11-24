@@ -23,6 +23,39 @@ rights.set(ACTION.UPDATE, [ROLE.MODERATOR]);
 rights.set(ACTION.DELETE, [ROLE.ADMIN]);
 
 
+const CRUD2 = new Map();
+
+const ADMIN = {
+    ADMIN: [ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
+    MODERATOR:[ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
+    USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
+};
+
+const MODERATOR = {
+    ADMIN: [],
+    MODERATOR: [ACTION.READ],
+    USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE],
+}
+
+const USER = {
+        ADMIN: [],
+        MODERATOR: [ACTION.READ],
+        USER: [ACTION.READ],
+    };
+
+const SELF = {
+        ADMIN: [ACTION.READ, ACTION.UPDATE],
+        MODERATOR: [ACTION.READ, ACTION.UPDATE],
+        USER: [ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
+    };
+
+
+
+CRUD2.set(ROLE.ADMIN,ADMIN);
+CRUD2.set(ROLE.MODERATOR,MODERATOR);
+CRUD2.set(ROLE.USER, USER);
+CRUD2.set("SELF", SELF);
+
 const CRUD = {
     ADMIN: {
         ADMIN: [ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
@@ -63,14 +96,24 @@ class User{
         this.role = role;
     };
 
-    static checkPermission(act,userMe, userChecked){
+    static checkPermission(act,userMe, userChecked) {
+        const role = (userMe.email === userChecked.email) ? "SELF" : userMe.role;
+
+        if (rights.get(act).includes(userChecked.role)) {
+            const me = CRUD2.get(role);
+
+            return (CRUD2.get(role)[userChecked.role].includes(act));
+        };
+        return false;
+    }
+    /*static checkPermission(act,userMe, userChecked){
         const role = (userMe.email === userChecked.email) ? "SELF" : userMe.role;
 
          if (rights.get(act).includes(userChecked.role)){
              return (CRUD[role][userChecked.role].includes(act));
          };
          return false;
-    };
+    };*/
 }
 
 const admin = new User("Admin", "Adminovich", "admin@gmail.com", ROLE.ADMIN);
