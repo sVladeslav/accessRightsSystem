@@ -1,84 +1,133 @@
-
-
 const ROLE = Object.freeze({
-    ADMIN: "ADMIN",
-    MODERATOR: "MODERATOR",
-    USER: "USER",
-}
+        ADMIN: "ADMIN",
+        MODERATOR: "MODERATOR",
+        USER: "USER",
+
+        SELF: "SELF",
+    }
 );
 
 const ACTION = Object.freeze({
-    CREATE: "CREATE",
-    READ: "READ",
-    UPDATE: "UPDATE",
-    DELETE: "DELETE",
-}
+        CREATE: "CREATE",
+        READ: "READ",
+        UPDATE: "UPDATE",
+        DELETE: "DELETE",
+    }
 );
 
-const rights = new Map();
+/*const rights = new Map();
 
 rights.set(ACTION.CREATE, [ROLE.ADMIN, ROLE.USER]);
 rights.set(ACTION.READ, [ROLE.ADMIN, ROLE.MODERATOR, ROLE.USER]);
 rights.set(ACTION.UPDATE, [ROLE.MODERATOR]);
-rights.set(ACTION.DELETE, [ROLE.ADMIN]);
+rights.set(ACTION.DELETE, [ROLE.ADMIN]);*/
 
 
-const CRUD2 = new Map();
+const ADMIN = new Map();
+ADMIN.set(
+    ROLE.ADMIN, [
+        ACTION.READ,
+        ACTION.UPDATE,
+        ACTION.DELETE
+    ]
+);
+ADMIN.set(
+    ROLE.MODERATOR, [
+        ACTION.CREATE,
+        ACTION.READ,
+        ACTION.UPDATE,
+        ACTION.DELETE
+    ]
+);
+ADMIN.set(
+    ROLE.USER, [
+        ACTION.CREATE,
+        ACTION.READ,
+        ACTION.UPDATE,
+        ACTION.DELETE
+    ]
+);
+ADMIN.set(
+    ROLE.SELF, [
+        ACTION.READ,
+        ACTION.UPDATE
+    ]
+);
 
-const ADMIN = {
-    ADMIN: [ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
-    MODERATOR:[ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
-    USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
-};
+const MODERATOR = new Map();
+MODERATOR.set(
+    ROLE.ADMIN, []
+);
+MODERATOR.set(
+    ROLE.MODERATOR, [
+        ACTION.READ
+    ]
+);
+MODERATOR.set(
+    ROLE.USER, [
+        ACTION.CREATE,
+        ACTION.READ,
+        ACTION.UPDATE
+    ]
+);
+MODERATOR.set(
+    ROLE.SELF, [
+        ACTION.READ,
+        ACTION.UPDATE
+    ]
+);
 
-const MODERATOR = {
-    ADMIN: [],
-    MODERATOR: [ACTION.READ],
-    USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE],
-}
+const USER = new Map();
+USER.set(
+    ROLE.ADMIN, []
+);
+USER.set(
+    ROLE.MODERATOR, [
+        ACTION.READ
+    ]
+);
+USER.set(
+    ROLE.USER, [
+        ACTION.READ
+    ]
+);
+USER.set(
+    ROLE.SELF, [
+        ACTION.READ,
+        ACTION.UPDATE,
+        ACTION.DELETE
+    ]
+);
 
-const USER = {
-        ADMIN: [],
-        MODERATOR: [ACTION.READ],
-        USER: [ACTION.READ],
-    };
+const rights = new Map();
 
-const SELF = {
-        ADMIN: [ACTION.READ, ACTION.UPDATE],
-        MODERATOR: [ACTION.READ, ACTION.UPDATE],
-        USER: [ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
-    };
+rights.set(ROLE.ADMIN, ADMIN);
+rights.set(ROLE.MODERATOR, MODERATOR);
+rights.set(ROLE.USER, USER);
 
 
-
-CRUD2.set(ROLE.ADMIN,ADMIN);
-CRUD2.set(ROLE.MODERATOR,MODERATOR);
-CRUD2.set(ROLE.USER, USER);
-CRUD2.set("SELF", SELF);
-
-const CRUD = {
+/*const CRUD = {
     ADMIN: {
-        ADMIN: [ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
-        MODERATOR:[ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
-        USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE,ACTION.DELETE],
+        ADMIN: [ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
+        MODERATOR: [ACTION.CREATE, ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
+        USER: [ACTION.CREATE, ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
     },
     MODERATOR: {
         ADMIN: [],
         MODERATOR: [ACTION.READ],
-        USER: [ACTION.CREATE, ACTION.READ,ACTION.UPDATE],
+        USER: [ACTION.CREATE, ACTION.READ, ACTION.UPDATE],
     },
     USER: {
         ADMIN: [],
         MODERATOR: [ACTION.READ],
         USER: [ACTION.READ],
     },
-    SELF:{
-      ADMIN: [ACTION.READ, ACTION.UPDATE],
-      MODERATOR: [ACTION.READ, ACTION.UPDATE],
-      USER: [ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
+    SELF: {
+        ADMIN: [ACTION.READ, ACTION.UPDATE],
+        MODERATOR: [ACTION.READ, ACTION.UPDATE],
+        USER: [ACTION.READ, ACTION.UPDATE, ACTION.DELETE],
     },
-};
-
+};*/
 
 
 /*
@@ -87,8 +136,7 @@ checkPermission(ACTION.DELETE, ROLE.USER);
 checkPermission(ACTION.UPDATE, ROLE.MODERATOR);*/
 
 
-
-class User{
+class User {
     constructor(name, surname, email, role) {
         this.name = name;
         this.surname = surname;
@@ -96,7 +144,7 @@ class User{
         this.role = role;
     };
 
-    static checkPermission(act,userMe, userChecked) {
+    static checkPermission(act, userMe, userChecked) {
         const role = (userMe.email === userChecked.email) ? "SELF" : userMe.role;
 
         if (rights.get(act).includes(userChecked.role)) {
@@ -106,6 +154,8 @@ class User{
         };
         return false;
     }
+
+
     /*static checkPermission(act,userMe, userChecked){
         const role = (userMe.email === userChecked.email) ? "SELF" : userMe.role;
 
@@ -115,6 +165,8 @@ class User{
          return false;
     };*/
 }
+
+let idIncrement =
 
 const admin = new User("Admin", "Adminovich", "admin@gmail.com", ROLE.ADMIN);
 const user = new User("User", "Userov", "user@gmail.com", ROLE.USER);
